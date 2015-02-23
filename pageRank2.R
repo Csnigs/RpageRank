@@ -44,35 +44,45 @@ pageRank<-function(dataT,epsil=0.0001){
       #ajoute le outDegree au data
       nNodes<-nNode(dataT)
       dataT[ , `:=`(outD = .N) , by = from]
-      dataT<-mutate(dataT,preri = 1/outD)
+      dataT<-mutate(dataT,preri = 0,R1 = 1/nNodes,R2 =0)
       
       #Init rank1 et rank2
       R1<-rep(1/nNodes,nNodes)
       R2<-rep(0,nNodes)
       rank<-data.table(R1,R2)
 
-      oddIt<-2
+      turn<-T
+      setkey(dataT,to)
      # setkey(dataT,)
-      while (distV(rank[,R1],rank[,R2])>epsil){
-            #Iteration 2
-            ranki<-rank[[getnewID(dataT[1,from]),3-oddIt]]
-            outDi<-dataT[1,preri]
-            oldIDi<- dataT[1,from]
-            for (rowNum in seq(nrow(dataT))) {  
-                  
-                  if(dataT[rowNum,from] == oldIDi){
-                         set(dataT,rowNum,4L,outDi*ranki)
-                       # set(dataT,rowNum,4L,dataT[rowNum,preri]*rank[[getnewID(dataT[rowNum,from]),3-oddIt]])
-                       # dataT[rowNum,preri:= dataT[rowNum,preri]*rank[getnewID(dataT[rowNum,from]),3-oddIt]]
-                  }
-                  else{
-                        oldIDi<- dataT[rowNum,from]
-                        ranki<-rank[[getnewID(oldIDi),3-oddIt]]
-                        outDi<-dataT[rowNum,preri]
-                        set(dataT,rowNum,4L,outDi*ranki)
-                  }
+      while (distV(dataT[,R1],dataT[,R2])>epsil){
+            if (turn){
+                  outDi<-dataT[1,preri]
+                  dataT[ , `:=`(preri = R1/outD)]
+                  outDi<-dataT[1,preri]
+                  turn<-!turn
             }
-            dataT<-aggregate(. ~ to, data=select(dataT,to,preri), FUN = sum)
+            ## AGREGATIOOONNNNNNN
+            
+#             #Iteration 2
+#             
+#             ranki<-rank[[getnewID(dataT[1,from]),3-oddIt]]
+#             outDi<-dataT[1,preri]
+#             oldIDi<- dataT[1,from]
+#             for (rowNum in seq(nrow(dataT))) {  
+#                   
+#                   if(dataT[rowNum,from] == oldIDi){
+#                          set(dataT,rowNum,4L,outDi*ranki)
+#                        # set(dataT,rowNum,4L,dataT[rowNum,preri]*rank[[getnewID(dataT[rowNum,from]),3-oddIt]])
+#                        # dataT[rowNum,preri:= dataT[rowNum,preri]*rank[getnewID(dataT[rowNum,from]),3-oddIt]]
+#                   }
+#                   else{
+#                         oldIDi<- dataT[rowNum,from]
+#                         ranki<-rank[[getnewID(oldIDi),3-oddIt]]
+#                         outDi<-dataT[rowNum,preri]
+#                         set(dataT,rowNum,4L,outDi*ranki)
+#                   }
+#             }
+#             dataT<-aggregate(. ~ to, data=select(dataT,to,preri), FUN = sum)
             
             #dataT<-select(dataT,to,preri)[, lapply(.SD, sum), by = preri]
             
