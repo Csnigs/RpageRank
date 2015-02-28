@@ -64,7 +64,7 @@ pageRank<-function(dataP,epsil=0.1){
             dataT[,newID:=NULL]
             dataT[ , `:=`(preri = Rank*0.8/outD)]
             agregPreri<-data.table(group_by(dataT,to) %>%summarise( agRi = sum(preri)))
-
+            dataT[,Rank:=NULL]
             prevrank<-rank          
             
             setnames(agregPreri,"to","oldID")
@@ -81,7 +81,7 @@ pageRank<-function(dataP,epsil=0.1){
             iteration<-iteration+1
             print(iteration)
             print(dist)
-            
+            remove(list=c("agregPreri","drank"))
             
 #             dataT[ , `:=`(preri = R1/outD)]
 #             agregPreri<-group_by(dataT,to) %>%summarise( agRi = sum(preri))
